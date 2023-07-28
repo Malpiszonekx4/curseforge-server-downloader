@@ -18,6 +18,14 @@ type Data struct {
 	FileName string
 }
 
+type versionNotFoundError struct {
+	version *string
+}
+
+func (e *versionNotFoundError) Error() string {
+	return fmt.Sprintf("Cannot find modpack version %s", *e.version)
+}
+
 func main() {
 	var version *string = flag.String("version", "latest", "")
 	var modpackId *int = flag.Int("pack", -1, "")
@@ -28,11 +36,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Printf("Downloading version %s of modpack with ID %d\n", *version, *modpackId)
+
 	url := fmt.Sprintf("https://www.curseforge.com/api/v1/mods/%d/files", *modpackId)
-	modpackFile := getData(url, version)
+	modpackFile, err := getData(url, version)
+	if err != nil {
+		fmt.Printf("Error while getting modpack: %s\n", err)
+		os.Exit(1)
+	}
 
 	additionalFilesUrl := fmt.Sprintf("https://www.curseforge.com/api/v1/mods/%d/files/%d/additional-files", *modpackId, modpackFile.Id)
-	serverFileData := getData(additionalFilesUrl, version)
+	serverFileData, err := getData(additionalFilesUrl, version)
+	if err != nil {
+		fmt.Printf("Error while getting server file: %s\n", err)
+		os.Exit(1)
+	}
 
 	downloadUrl := fmt.Sprintf("https://www.curseforge.com/api/v1/mods/%d/files/%d/download", *modpackId, serverFileData.Id)
 
@@ -58,7 +76,7 @@ func main() {
 
 }
 
-func getData(url string, modpackVersion *string) Data {
+func getData(url string, modpackVersion *string) (Data, error) {
 	res, err := http.Get(url)
 
 	if err != nil {
@@ -73,16 +91,15 @@ func getData(url string, modpackVersion *string) Data {
 	json.Unmarshal(body, &jsonresp)
 
 	if *modpackVersion == "latest" {
-		return jsonresp.Data[len(jsonresp.Data)-1]
+		return jsonresp.Data[len(jsonresp.Data)-1], nil
 	}
 
-	var file Data
 	for i, e := range jsonresp.Data {
 		if strings.Contains(e.FileName, *modpackVersion) {
-			file = jsonresp.Data[i]
-			break
+			return jsonresp.Data[i], nil
 		}
 	}
 
-	return file
+	return Data{}, &versionNotFoundError{modpackVersion}
+
 }
