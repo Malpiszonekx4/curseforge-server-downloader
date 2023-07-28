@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func runTest(t *testing.T, packId int, version string, validHash string) {
+func shouldDownloadCorrectFile(t *testing.T, packId int, version string, validHash string) {
 
 	cmd := exec.Command("./curseforge-server-downloader", fmt.Sprintf("--pack=%d", packId), fmt.Sprintf("--version=%s", version))
 	err := cmd.Run()
@@ -38,7 +38,7 @@ func runTest(t *testing.T, packId int, version string, validHash string) {
 
 	hashString := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
-	if hashString != "ex+q2BusZWGZhKG4a8V5yLf0i4BJGKf4XhjtiJK/46c=" {
+	if hashString != validHash {
 		t.Error("Hashes don't match. File is malformed.")
 	}
 
@@ -46,10 +46,26 @@ func runTest(t *testing.T, packId int, version string, validHash string) {
 
 }
 
-func Test1(t *testing.T) {
-	runTest(t, 439293, "1.5.3", "ex+q2BusZWGZhKG4a8V5yLf0i4BJGKf4XhjtiJK/46c=")
+func TestDownloadSpecifiedVersion(t *testing.T) {
+	shouldDownloadCorrectFile(t, 439293, "1.5.3", "ex+q2BusZWGZhKG4a8V5yLf0i4BJGKf4XhjtiJK/46c=")
 }
 
-func Test2(t *testing.T) {
-	runTest(t, 439293, "latest", "ex+q2BusZWGZhKG4a8V5yLf0i4BJGKf4XhjtiJK/46c=")
+func TestDownloadLatest(t *testing.T) {
+	// latest sky factory 4 https://www.curseforge.com/minecraft/modpacks/skyfactory-4/files/3565683
+	shouldDownloadCorrectFile(t, 296062, "latest", "aovsWWh/PVVHV5WBGSCWa6tvkUAN9m2ffKkhUyCLnZY=")
 }
+
+/*
+func testGenHash(t *testing.T) {
+	file, _ := os.Open("./server.zip")
+
+	hash := sha256.New()
+	_, _ = io.Copy(hash, file)
+
+	file.Close()
+
+	hashString := base64.StdEncoding.EncodeToString(hash.Sum(nil))
+
+	t.Log(hashString)
+}
+*/
