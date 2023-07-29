@@ -28,7 +28,7 @@ func (e *versionNotFoundError) Error() string {
 
 func main() {
 	var version *string = flag.String("version", "latest", "")
-	var modpackId *int = flag.Int("pack", 0, "")
+	var modpackId *int = flag.Int("pack", 0, "id of curseforge modpack (first number in download url)")
 	flag.Parse()
 
 	if *modpackId == 0 {
