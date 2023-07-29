@@ -28,10 +28,10 @@ func (e *versionNotFoundError) Error() string {
 
 func main() {
 	var version *string = flag.String("version", "latest", "")
-	var modpackId *int = flag.Int("pack", -1, "")
+	var modpackId *int = flag.Int("pack", 0, "")
 	flag.Parse()
 
-	if *modpackId == -1 {
+	if *modpackId == 0 {
 		fmt.Println("Please provide modpack id with '--pack <id>' option")
 		os.Exit(1)
 	}
