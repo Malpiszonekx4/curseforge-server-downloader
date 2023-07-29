@@ -11,6 +11,10 @@ jobs:
     strategy:
       matrix:
         runner: [ubuntu-latest, windows-latest]
+        arch: [amd64]
+        include:
+          - runner: ubuntu-latest
+            arch: arm64
     runs-on: ${{matrix.runner}}
     steps:
       - uses: actions/checkout@v3
@@ -21,16 +25,26 @@ jobs:
           go-version: "1.20"
 
       - name: 🔨 Build
-        run: go build .
+        run: go build -o cursedl-${{runner.os}}-${{matrix.arch}}
+        env:
+          CGO_ENABLED: 0
+          GOARCH: ${{matrix.arch}}
+
+      - name: Add .exe to windows build
+        if: runner.os == 'Windows'
+        run: mv cursedl-${{runner.os}}-${{matrix.arch}} cursedl-${{runner.os}}-${{matrix.arch}}.exe
 
       - name: 🔮 Run tests
         run: go test .
+        env:
+          BINARY: ./cursedl-${{runner.os}}-${{matrix.arch}}
+        if: matrix.arch != 'arm64'
 
       - name: ⬆ Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: build-${{runner.os}}
-          path: curseforge-server-downloader*
+          name: build-${{runner.os}}-${{matrix.arch}}
+          path: cursedl-*
 
   release:
     name: 🚀 Release on GitHub
