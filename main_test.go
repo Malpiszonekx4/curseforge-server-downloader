@@ -12,15 +12,20 @@ import (
 
 func shouldDownloadCorrectFile(t *testing.T, packId int, version string, validHash string) {
 
-	cmd := exec.Command("./curseforge-server-downloader", fmt.Sprintf("--pack=%d", packId), fmt.Sprintf("--version=%s", version))
+	binary, found := os.LookupEnv("BINARY")
+	if !found {
+		t.Fatal("BINARY env var not found")
+	}
+
+	cmd := exec.Command(binary, fmt.Sprintf("--pack=%d", packId), fmt.Sprintf("--version=%s", version))
 	err := cmd.Run()
 	if err != nil {
-		t.Error("Error running downloader")
+		t.Fatalf("Error running downloader: %s", err)
 	}
 	_, err = os.Stat("./server.zip")
 
 	if err != nil {
-		t.Error("Didn't create a server.zip file")
+		t.Fatal("Didn't create a server.zip file")
 	}
 
 	file, err := os.Open("./server.zip")
@@ -32,6 +37,7 @@ func shouldDownloadCorrectFile(t *testing.T, packId int, version string, validHa
 	_, err = io.Copy(hash, file)
 	if err != nil {
 		t.Fatal(err)
+		file.Close()
 	}
 
 	file.Close()
