@@ -58,7 +58,7 @@ func TestDownloadSpecifiedVersion(t *testing.T) {
 
 func TestDownloadLatest(t *testing.T) {
 	// latest sky factory 4 https://www.curseforge.com/minecraft/modpacks/skyfactory-4/files/3565683
-	shouldDownloadCorrectFile(t, 296062, "latest", "aovsWWh/PVVHV5WBGSCWa6tvkUAN9m2ffKkhUyCLnZY=")
+	shouldDownloadCorrectFile(t, 296062, "latest", "crG65hy9agerVdcfnhqUI5pJkvNaf59KFJ5PHuoEoWs=")
 }
 
 /*
