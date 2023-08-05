@@ -14,8 +14,9 @@ type Resp struct {
 	Data []Data
 }
 type Data struct {
-	Id       int
-	FileName string
+	Id          int
+	FileName    string
+	DisplayName string
 }
 
 type versionNotFoundError struct {
@@ -98,6 +99,9 @@ func getData(url string, modpackVersion *string) (Data, error) {
 	for i := range jsonresp.Data {
 		data := jsonresp.Data[last-i]
 		if strings.Contains(data.FileName, *modpackVersion) {
+			return data, nil
+		}
+		if strings.Contains(data.DisplayName, *modpackVersion) {
 			return data, nil
 		}
 	}
