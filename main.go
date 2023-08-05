@@ -38,7 +38,7 @@ func main() {
 
 	fmt.Printf("Downloading version %s of modpack with ID %d\n", *version, *modpackId)
 
-	url := fmt.Sprintf("https://www.curseforge.com/api/v1/mods/%d/files", *modpackId)
+	url := fmt.Sprintf("https://www.curseforge.com/api/v1/mods/%d/files?pageSize=50", *modpackId)
 	modpackFile, err := getData(url, version)
 	if err != nil {
 		fmt.Printf("Error while getting modpack: %s\n", err)
@@ -94,9 +94,11 @@ func getData(url string, modpackVersion *string) (Data, error) {
 		return jsonresp.Data[len(jsonresp.Data)-1], nil
 	}
 
-	for i, e := range jsonresp.Data {
-		if strings.Contains(e.FileName, *modpackVersion) {
-			return jsonresp.Data[i], nil
+	last := len(jsonresp.Data) - 1
+	for i := range jsonresp.Data {
+		data := jsonresp.Data[last-i]
+		if strings.Contains(data.FileName, *modpackVersion) {
+			return data, nil
 		}
 	}
 
